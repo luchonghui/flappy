@@ -21,6 +21,7 @@ import javax.management.RuntimeErrorException;
 
 import cz.uhk.pro2.flappy.game.GameBoard;
 import cz.uhk.pro2.flappy.game.Tile;
+import cz.uhk.pro2.flappy.game.tiles.BonusTile;
 import cz.uhk.pro2.flappy.game.tiles.EmptyTile;
 import cz.uhk.pro2.flappy.game.tiles.WallTile;
 
@@ -107,7 +108,7 @@ public class CsvBoardLoader implements BoardLoader {
 		case "Wall":
 			return new WallTile(resizedImage);
 		case "Bonus":
-			return new EmptyTile(resizedImage); // TODO dodelat dlazdici typu
+			return new BonusTile(resizedImage); // TODO dodelat dlazdici typu
 												// bonus
 		case "Empty":
 			return new EmptyTile(resizedImage);
