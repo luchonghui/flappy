@@ -62,7 +62,7 @@ public class GameBoard implements TickAware {
 						if(bird.collidesWithRectangle(screenX, screenY, Tile.SIZE, Tile.SIZE)){
 							// došlo ke kolizi ptáka s dlaždicí
 							//System.out.println("Kolize");
-							//gameover = true;
+							gameover = true;
 						}
 					}
 
