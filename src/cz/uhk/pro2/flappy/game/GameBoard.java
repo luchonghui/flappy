@@ -1,12 +1,9 @@
 package cz.uhk.pro2.flappy.game;
 
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.List;
 
 import cz.uhk.pro2.flappy.game.tiles.BonusTile;
-import cz.uhk.pro2.flappy.game.tiles.EmptyTile;
 import cz.uhk.pro2.flappy.game.tiles.WallTile;
 
 public class GameBoard implements TickAware {
@@ -70,11 +67,7 @@ public class GameBoard implements TickAware {
 					if(t instanceof BonusTile){// je dlaždice typu bonus?
 						if(bird.collidesWithRectangle(screenX, screenY, Tile.SIZE, Tile.SIZE)){
 							// došlo ke kolizi ptáka s dlaždicí
-							System.out.println("Sebráno");
-							list.add(t);
-							for(Tile tile : list){
-								((BonusTile) tile).draw(g, screenX, screenY, true);
-							}
+							((BonusTile) t).setTitle(false);
 						}
 					}
 
