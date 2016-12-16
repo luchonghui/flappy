@@ -6,15 +6,19 @@ import java.awt.Image;
 import cz.uhk.pro2.flappy.game.Tile;
 
 public abstract class AbstractWallTile implements Tile {
-	Image image;
+	protected Image image;
 
-	public AbstractWallTile(Image image) {
-		this.image = image;
+protected Image img; 
+	
+	public AbstractWallTile(Image img){
+		this.img = img;
 	}
 	
+	public AbstractWallTile(){}
+
 	@Override
 	public void draw(Graphics g, int x, int y) {
-		//g.drawRect(x, y, Tile.SIZE, Tile.SIZE);
-		g.drawImage(image, x, y, null);
+		//g.drawRect(x, y, SIZE, SIZE);
+		g.drawImage(img, x, y, null);
 	}
 }

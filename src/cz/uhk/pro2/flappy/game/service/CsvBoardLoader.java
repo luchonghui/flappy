@@ -26,96 +26,112 @@ import cz.uhk.pro2.flappy.game.tiles.EmptyTile;
 import cz.uhk.pro2.flappy.game.tiles.WallTile;
 
 public class CsvBoardLoader implements BoardLoader {
-	// pomocny objekt pro zapisovani hlasek o prubehu programu
-	static final Logger logger = Logger.getLogger(CsvBoardLoader.class.getName());
-
-	InputStream is; // stream, ze ktereho nacitame level
-
+private InputStream is;	 // stream, ze ktereho nacitame level
+	
 	public CsvBoardLoader(InputStream is) {
 		this.is = is;
 	}
-
+	
 	@Override
-	public GameBoard getGameboard() {
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
-			// radek s poctem typu dlazdic
-			String[] line = br.readLine().split(";");
-			int numberOfTypes = Integer.parseInt(line[0]);
-			// logger.log(Level.FINE, "Number of tile types: " + numberOfTypes);
-			System.out.println("Poèet druhù dlaždic: " + numberOfTypes);
-			// typy dlazdic
-			Map<String, Tile> tileTypes = new HashMap<>();
-			for (int i = 0; i < numberOfTypes; i++) {
-				line = br.readLine().split(";");
-				String type = line[0];
-				String clazz = line[1];
-				int spriteX = Integer.parseInt(line[2]);
-				int spriteY = Integer.parseInt(line[3]);
-				int spriteWidth = Integer.parseInt(line[4]);
-				int spriteHeight = Integer.parseInt(line[5]);
+	public GameBoard loadLevel() {
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(is))){// radek s poctem typu dlazdic
+			String[] line = br.readLine().split(";");			
+			int typeCount = Integer.parseInt(line[0]);
+			Map<String, Tile> tileMap = new HashMap<String,Tile>();
+			BufferedImage birdBufferedImage = null;
+			for(int i=0; i<typeCount; i++){
+				line=br.readLine().split(";");
+				String tileType = line[0];
+				String clazz=line[1];
+				int x = Integer.parseInt(line[2]);
+				int y = Integer.parseInt(line[3]);
+				int w = Integer.parseInt(line[4]);
+				int h = Integer.parseInt(line[5]);
 				String url = line[6];
-				Tile tile = createTile(clazz, spriteX, spriteY, spriteWidth, spriteHeight, url);
-				tileTypes.put(type, tile);
+				String referencedTileType = line.length > 7?line[7]:"";
+				Tile referencedTile = tileMap.get(referencedTileType);
+//				tileTypes[i] = new WallTile(new Image);
+				if(clazz.equals("Bird")){
+					birdBufferedImage = loadImage(x, y, w, h, url);
+				}else{
+					Tile tile = createTile(clazz, x, y, w, h, url, referencedTile);
+					tileMap.put(tileType, tile);
+				}
 			}
 			// radek s pocty radku a sloupcu v matici herni plochy
 			line = br.readLine().split(";");
 			int rows = Integer.parseInt(line[0]);
 			int columns = Integer.parseInt(line[1]);
-			System.out.println("Poèet øádkù, sloupcù: " + rows + "," + columns);
 			// vyrobime matici dlazdic
 			Tile[][] tiles = new Tile[rows][columns];
 			// projdeme radky s matici
-			for (int i = 0; i < rows; i++) {
+			System.out.println("Radky: " +rows+ " Sloupce: "+columns);
+			for(int i = 0; i<rows; i++){
 				line = br.readLine().split(";");
-				for (int j = 0; j < columns; j++) {
-					String t; // retezec v dane bunce
+				for(int j=0;j<columns;j++){
+					String cell; // retezec v dane bunce
 					// osetrime pripad, ze by v CSV chybely prazdne bunky na
 					// konci radku
-					if (j < line.length) {
-						// v poradku, bunku mame v CSV
-						t = line[j];
-					} else {
-						// bunka v CSV chybi, povazujeme ji za prazdnou
-						t = "";
+					if(j<line.length){
+						cell = line[j]; //bunka v CSV existuje
+					}else{
+						cell=""; //bunka v CSV chybi - povazujeme ji za prazdnou
 					}
-					tiles[i][j] = tileTypes.get(t);
+					tiles[i][j]=tileMap.get(cell);
 				}
 			}
-			GameBoard gb = new GameBoard(tiles);
-			return gb;
+			GameBoard gb = new GameBoard(tiles, birdBufferedImage);
+			gb.setTile(tileMap.get(""));
+			return gb;			
 		} catch (IOException e) {
-			throw new RuntimeException("Chyba pri cteni souboru", e);
+			throw new RuntimeException("Chyba pri cteni souboru",e);
 		}
+		
+	}
+	
+	// pomocny objekt pro zapisovani hlasek o prubehu programu
+	static final Logger logger = Logger.getLogger(CsvBoardLoader.class.getName());
+
+	
+private Tile createTile(String type, int x, int y, int w, int h, String url, Tile referencedTile) {
+		
+		try {
+			
+			BufferedImage resizedImage = loadImage(x, y, w, h, url);
+			
+			//vytvoÃ¸Ã­me odpovÃ­dajÃ­cÃ­ typ dlaÅ¾dice
+//			Tile tile;
+			switch(type){
+				case "Wall": return new WallTile(resizedImage);
+				case "Empty": return new EmptyTile(resizedImage);
+				case "Bonus": return new BonusTile(resizedImage, referencedTile);
+				default: throw new RuntimeException("Unknown tile type: "+type);
+			}
+			
+			
+		} catch (MalformedURLException e) {
+			throw new RuntimeException("Wrong url of image "+type+": "+url, e);
+		} catch (IOException e) {
+			throw new RuntimeException("Error while reading file "+type+": "+url, e);
+		}
+		
 	}
 
-	private Tile createTile(String clazz, int x, int y, int w, int h, String url)
-			throws IOException {
-		
+
+	private BufferedImage loadImage(int x, int y, int w, int h, String url)
+			throws IOException, MalformedURLException {
 		// stahnout obrazek z URL a ulozit do promenne
 		BufferedImage originalImage = ImageIO.read(new URL(url));
-		
+
 		// z urcitych souradnic vyrizneme dlazdici velikosti 16x16
 		// vyriznout odpovidajici sprite z velkeho obrazku s mnoha sprity
 		BufferedImage croppedImage = originalImage.getSubimage(x, y, w, h);
-		
+
 		// zvetsime/zmensime obrazek tak, aby sedel na velikost dlazdice
 		BufferedImage resizedImage = new BufferedImage(Tile.SIZE, Tile.SIZE, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = (Graphics2D) resizedImage.getGraphics();
+		Graphics2D g = resizedImage.createGraphics();
 		g.drawImage(croppedImage, 0, 0, Tile.SIZE, Tile.SIZE, null);
-		
-		// vytvorime odpovidajici dlazdice
-		switch (clazz) {
-		case "Wall":
-			return new WallTile(resizedImage);
-		case "Bonus":
-			return new BonusTile(resizedImage); // TODO dodelat dlazdici typu
-												// bonus
-		case "Empty":
-			return new EmptyTile(resizedImage);
-		default:
-			throw new RuntimeException("Neznámý typ dlazdice " + clazz);
-		}
-
+		return resizedImage;
 	}
 
 }

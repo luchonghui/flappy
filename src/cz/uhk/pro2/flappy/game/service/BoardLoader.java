@@ -3,16 +3,17 @@ package cz.uhk.pro2.flappy.game.service;
 import cz.uhk.pro2.flappy.game.GameBoard;
 
 /**
- * Rozhrani pro vsechny tridy, ktere umi nejak nacist herni plochu
+ * Spoledne rozhrani pro tridy umoznujici nacitat level
  * 
- * @author krizpa1
+ * @author cahaon1
  *
  */
+
 public interface BoardLoader {
 	/**
-	 * Nacte a vrati herni plochu
-	 * 
+	 * naète level (herní plochu)
 	 * @return
 	 */
-	public GameBoard getGameboard();
+	GameBoard loadLevel();
+	
 }

@@ -16,66 +16,61 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import cz.uhk.pro2.flappy.game.GameBoard;
-import cz.uhk.pro2.flappy.game.service.BoardLoader;
 import cz.uhk.pro2.flappy.game.service.CsvBoardLoader;
 
-public class MainWindow extends JFrame {
-	BoardPanel pnl = new BoardPanel();
+public class MainWindow extends JFrame{
 	GameBoard gameBoard;
+	BoardPanel pnl = new BoardPanel();
 	long x = 0;
-	
 	
 	class BoardPanel extends JPanel {
 		@Override
 		public void paint(Graphics g) {
-			super.paint(g);
-			gameBoard.drawAndTestCollisions(g);
+			super.paint(g); //vykresli prazdny panel
+			gameBoard.drawAndTestCollisions(g); //vykresli hraci plochu
 		}
 	}
 	
-	public MainWindow() {
-		try (InputStream is = new FileInputStream("muj_level.csv")) {
-			// vytvorime si loader
-			BoardLoader loader = new CsvBoardLoader(is);
-			gameBoard = loader.getGameboard();
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-			gameBoard = new GameBoard();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			gameBoard = new GameBoard();
+	public MainWindow(){
+		try(InputStream is = new FileInputStream("muj_level.csv")){
+			CsvBoardLoader loader = new CsvBoardLoader(is);
+			gameBoard = loader.loadLevel();
+			
+		} catch (FileNotFoundException e){
+			e.printStackTrace();
+		} catch (IOException e){
+			e.printStackTrace();
 		}
-		pnl.setPreferredSize(new Dimension(200, 200)); // TODO
-		add(pnl, BorderLayout.CENTER);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		pack();
-		gameBoard.setviewportWidth(pnl.getWidth());
 		
+		//gameBoard = new GameBoard();
+		add(pnl,BorderLayout.CENTER);
+		pnl.setPreferredSize(new Dimension(200,gameBoard.getHeightPix()));
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setResizable(false);
+		pack();
 		
 		addMouseListener(new MouseAdapter() {
+			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				//TODO metoda kickTheBird
-				System.out.println("Mys");
+				//TODO zavolame metodu kickTheBird
 				gameBoard.kickTheBird();
 			}
 		});
 		
-		
-		
 		Timer t = new Timer(20, e -> {
+			if(gameBoard.getStatus())return;
 			gameBoard.tick(x++);
 			pnl.repaint();
 		});
 		
 		t.start();
 	}
-
-	public static void main(String[] args) {	
+	
+	public static void main(String[] args){
 		SwingUtilities.invokeLater(()-> {
 			MainWindow w = new MainWindow();
 			w.setVisible(true);
 		});
 	}
-
 }

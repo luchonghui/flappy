@@ -6,20 +6,17 @@ import java.awt.Image;
 import cz.uhk.pro2.flappy.game.Tile;
 
 public class BonusTile extends AbstractWallTile {
-	private boolean active = true;// sezrano nebo ne
+	Tile emptyTile;
 	
-	public BonusTile(Image image) {
-		super(image);
-	}
-	
-	public void setTitle(boolean active){
-		this.active=active;
-	}
 
-	public void draw(Graphics g, int x, int y) {
-		if(active){
-			super.draw(g,x,y);
-		}
+	public BonusTile(Image img, Tile emptyTile){
+		super.img = img;
+		this.emptyTile = emptyTile;
+	}
+	
+	@Override
+	public void draw(Graphics g, int x, int y){
+		g.drawImage(img, x, y, null);
 	}
 
 	//dokud neni sezran je videt
