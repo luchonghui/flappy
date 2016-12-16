@@ -5,7 +5,7 @@ import java.awt.Graphics;
 /**
  * Spolecny interface pro vsechny druhy dlazdic na herni plose
  * 
- * @author krizpa1
+ * @author kratkra1
  *
  */
 public interface Tile {

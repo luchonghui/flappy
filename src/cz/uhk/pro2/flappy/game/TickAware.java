@@ -3,6 +3,9 @@ package cz.uhk.pro2.flappy.game;
 /**
  * Rozhrani pro objekty, ktere potrebuji vedet,
  * kolik casu (ticku) ubehlo od zacatku hry
+ * 
+ * @author kratkra1
+ * 
  */
 public interface TickAware {
 	

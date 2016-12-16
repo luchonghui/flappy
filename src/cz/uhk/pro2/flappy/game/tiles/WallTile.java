@@ -4,8 +4,8 @@ import java.awt.Image;
 
 public class WallTile extends AbstractWallTile {
 
-	public WallTile(Image image) {
-		super(image);
+	public WallTile(Image img) {
+		super(img);
 	}
 
 }
