@@ -18,55 +18,56 @@ import javax.swing.Timer;
 import cz.uhk.pro2.flappy.game.GameBoard;
 import cz.uhk.pro2.flappy.game.service.CsvBoardLoader;
 
-public class MainWindow extends JFrame{
+public class MainWindow extends JFrame {
 	GameBoard gameBoard;
 	BoardPanel pnl = new BoardPanel();
 	long x = 0;
-	
+
 	class BoardPanel extends JPanel {
 		@Override
 		public void paint(Graphics g) {
-			super.paint(g); //vykresli prazdny panel
-			gameBoard.drawAndTestCollisions(g); //vykresli hraci plochu
+			super.paint(g); // vykresli prazdny panel
+			gameBoard.drawAndTestCollisions(g); // vykresli hraci plochu
 		}
 	}
-	
-	public MainWindow(){
-		try(InputStream is = new FileInputStream("muj_level.csv")){
-			CsvBoardLoader loader = new CsvBoardLoader(is);
-			gameBoard = loader.loadLevel();
-			
-		} catch (FileNotFoundException e){
-			e.printStackTrace();
-		} catch (IOException e){
-			e.printStackTrace();
-		}
-		add(pnl,BorderLayout.CENTER);
-		pnl.setPreferredSize(new Dimension(200,200));
+
+	public MainWindow() {
+		/*
+		 * try(InputStream is = new FileInputStream("muj_level.csv")){
+		 * CsvBoardLoader loader = new CsvBoardLoader(is); gameBoard =
+		 * loader.loadLevel();
+		 * 
+		 * } catch (FileNotFoundException e){ e.printStackTrace(); } catch
+		 * (IOException e){ e.printStackTrace(); }
+		 */
+		LevelPicker picker = new LevelPicker();
+		gameBoard = picker.pickAndLoadLevel();// pozor muze vracet null
+		add(pnl, BorderLayout.CENTER);
+		pnl.setPreferredSize(new Dimension(200, 200));
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
 		pack();
 		gameBoard.setviewportWidth(pnl.getWidth());
 
 		addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mousePressed(MouseEvent e) {
-				//TODO zavolame metodu kickTheBird
+				// TODO zavolame metodu kickTheBird
 				gameBoard.kickTheBird();
 			}
 		});
-		
+
 		Timer t = new Timer(20, e -> {
 			gameBoard.tick(x++);
 			pnl.repaint();
 		});
-		
+
 		t.start();
 	}
-	
-	public static void main(String[] args){
-		SwingUtilities.invokeLater(()-> {
+
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(() -> {
 			MainWindow w = new MainWindow();
 			w.setVisible(true);
 		});
