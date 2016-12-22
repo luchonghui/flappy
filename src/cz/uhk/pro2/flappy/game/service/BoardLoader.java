@@ -5,13 +5,13 @@ import cz.uhk.pro2.flappy.game.GameBoard;
 /**
  * Spoledne rozhrani pro tridy umoznujici nacitat level
  * 
- * @author cahaon1
+ * @author kratkra1
  *
  */
 
 public interface BoardLoader {
 	/**
-	 * naète level (herní plochu)
+	 * načte level (herní plochu)
 	 * @return
 	 */
 	GameBoard loadLevel();

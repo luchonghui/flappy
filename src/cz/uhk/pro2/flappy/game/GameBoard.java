@@ -13,13 +13,20 @@ public class GameBoard implements TickAware {
 	int viewportWidth=200; // sirka hraci plochy v pixelech
 	Bird bird;
 	boolean gameover = false;
-	boolean bonusTaken=false;
-	Tile tile;
+	Image imageOfTheBird;
 	
-	
-	public GameBoard(Tile[][] tiles , Image imageOfTheBird) {
-		this.tiles = tiles;
-		bird = new Bird(viewportWidth/2, tiles.length*Tile.SIZE/2, imageOfTheBird); /// TODO umistit do stredu okna?
+
+	public GameBoard(Tile[][] tiles, Image imageOfTheBird){
+		this.tiles = tiles;;
+		this.imageOfTheBird=imageOfTheBird;
+		reset();
+	}
+	public boolean isGameOver(){
+		return gameover;
+	}
+
+	public void kickTheBird(){
+		bird.kick();
 	}
 	
 	public void setviewportWidth(int viewportWidth) {
@@ -52,22 +59,23 @@ public class GameBoard implements TickAware {
 					t.draw(g, screenX, screenY);
 					
 					// otestujeme moznou kolizi dlazdice s ptakem
-					if(t instanceof WallTile){ //je dlazdice typu zed?
-						if(bird.collidesWithRectangle(screenX,screenY,Tile.SIZE,Tile.SIZE)){
-							//doslo ke kolizi
-							System.out.println("kolize");
-							//gameover = true;
+					if(t instanceof WallTile){//je dlazdice typu zed?
+						if(bird.collidesWithRectangle(screenX, screenY, Tile.SIZE, Tile.SIZE)){
+							//gameOver = true; //doslo ke kolizi, hra ma skoncit
 						}
 					}
+					
 					if(t instanceof BonusTile){
-						if(bird.collidesWithRectangle(screenX,screenY,Tile.SIZE,Tile.SIZE)){
-							//doslo ke kolizi
-							System.out.println("bonus");
-							replaceWithEmpty(i,j);
-							bonusTaken=true;
+						if(bird.collidesWithRectangle(screenX, screenY, Tile.SIZE, Tile.SIZE)){
+							((BonusTile) t).setEaten(true);//ptak snedl bonus
+							//t.draw(g, viewportX,viewportY);
+							
 						}
 					}
-
+					
+					if(t instanceof BonusTile && j == (maxJ - 2)  ){//
+						((BonusTile)t).setEaten(false);
+					}
 				}
 			}
 		}
@@ -75,18 +83,10 @@ public class GameBoard implements TickAware {
 		bird.draw(g);
 	}
 
-	public void replaceWithEmpty(int i, int j){
-		tiles[i][j] = tiles[0][0];
-	}
-	
-	public boolean getStatus(){
-		return this.gameover;
-	}
-	
-
-	public void setTile(Tile t){
-		this.tile = t;
-	}
+	 public void reset(){
+		 gameover= false;
+		 bird = new Bird(100, 100,imageOfTheBird ); 
+	 }
 	
 	@Override
 	public void tick(long ticksSinceStart) {
@@ -98,17 +98,5 @@ public class GameBoard implements TickAware {
 			// dame vedet ptakovi, ze hodiny tickly
 			bird.tick(ticksSinceStart);
 		}
-	}
-	
-	public void kickTheBird() {
-		bird.kick();
-	}
-
-	public int getHeightPix() {
-			return Tile.SIZE*tiles.length;
-	}
-	
-	
-	
-	
+	}	
 }

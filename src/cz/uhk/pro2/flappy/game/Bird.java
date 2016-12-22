@@ -6,29 +6,31 @@ import java.awt.Image;
 import java.awt.geom.Ellipse2D;
 
 public class Bird implements TickAware {
-	// fyzika
-	static double speed = 0.0;
-	static final double speedInc = 0.2*Tile.SIZE/20;
-	static final double kickSpeed = -3.2*Tile.SIZE/20;
-
-	// souradnice stredu ptaka
-	int viewportX;
-	double viewportY; // pro ladìní rychlosti
-
-	// kolik ticku jeste zbyva, nez ptak zacne po nakopnuti zase padat
-	int ticksToFall = 0;
-
-	Image image; // obrazek ptaka
+	//fyzika
+	static final double koefUp = -4.0;
+	static final double koefDown = 2.0;
+	static final int ticksFlyingUp = 5;
 	
+	//souÅ™adnice stÅ™edu ptÃ¡ka
+	int viewportX;
+	double viewportY;//aby se dala jemnÄ› ladit rychlost padÃ¡nÃ­
+	
+	//rychlost padÃ¡nÃ­ (pozitivnÃ­), vzletu(negativnÃ­)
+	double velocityY = koefDown;
+	//kolik ticku zbÃ½vÃ¡, neÅ¾ zaÄne padat
+	int ticksToFall = 0;
+	//obrazek ptaka
+	final Image image;
 	public Bird(int initialX, int initialY, Image image) {
 		this.viewportX = initialX;
 		this.viewportY = initialY;
 		this.image = image;
 	}
-
+	
 	public void kick(){
-		if(speed > 0)speed = 0;
-		speed += kickSpeed;
+		velocityY = koefUp; //letÃ­ nahoru - mÄ›nÃ­ stav
+		ticksToFall = ticksFlyingUp; //jak dlouho letÃ­ nahoru
+		
 	}
 
 	public void draw(Graphics g) {
@@ -42,29 +44,25 @@ public class Bird implements TickAware {
 	}
 
 	/**
-	 * metoda která zjistí jestli pták narazil do dlaždice
+	 * metoda kterÃ¡ zjistÃ­ jestli ptÃ¡k narazil do dlaÅ¾dice
 	 * 
 	 * @return
 	 */
 	public boolean collidesWithRectangle(int x, int y, int w, int h) {
-		// vytvoøíme kružnici reprezentující obrys ptáka
+		// vytvoÅ™Ã­me kruÅ¾nici reprezentujÃ­cÃ­ obrys ptÃ¡ka
 		Ellipse2D.Float birdsBoundary = new Ellipse2D.Float((float)viewportX-Tile.SIZE/2, (float)viewportY-Tile.SIZE/2, w, h);
-		// ovìøíme jestli kruznice ma neprázdný prunik s ctvercem zadanym x,y,w,h
+		// ovÄ›Å™Ã­me jestli kruznice ma neprÃ¡zdnÃ½ prunik s ctvercem zadanym x,y,w,h
 		return birdsBoundary.intersects(x, y, w, h);
-	}
-	
-	public double getX(){
-		return viewportX;
-	}
-		
-	public double getY(){
-		return viewportY;
 	}
 
 	@Override
 	public void tick(long ticksSinceStart) {
-		speed += speedInc;
-		viewportY = viewportY + speed;
+		viewportY +=velocityY;
+		if(ticksToFall >0){//ptak letel nahoru
+			ticksToFall --;
+		}else{
+			velocityY=koefDown;//ptak zacne padat
+		}
 	}
 
 }

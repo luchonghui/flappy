@@ -1,3 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/cz/uhk/pro2/flappy/game/Bird.java=UTF-8
 encoding//src/cz/uhk/pro2/flappy/game/service/BoardLoader.java=UTF-8
 encoding//src/cz/uhk/pro2/flappy/game/service/CsvBoardLoader.java=UTF-8
+encoding//src/cz/uhk/pro2/flappy/game/tiles/BonusTile.java=UTF-8

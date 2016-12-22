@@ -41,14 +41,13 @@ public class MainWindow extends JFrame{
 		} catch (IOException e){
 			e.printStackTrace();
 		}
-		
-		//gameBoard = new GameBoard();
 		add(pnl,BorderLayout.CENTER);
-		pnl.setPreferredSize(new Dimension(200,gameBoard.getHeightPix()));
+		pnl.setPreferredSize(new Dimension(200,200));
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
 		pack();
-		
+		gameBoard.setviewportWidth(pnl.getWidth());
+
 		addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -59,7 +58,6 @@ public class MainWindow extends JFrame{
 		});
 		
 		Timer t = new Timer(20, e -> {
-			if(gameBoard.getStatus())return;
 			gameBoard.tick(x++);
 			pnl.repaint();
 		});

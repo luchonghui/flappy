@@ -26,7 +26,9 @@ import cz.uhk.pro2.flappy.game.tiles.EmptyTile;
 import cz.uhk.pro2.flappy.game.tiles.WallTile;
 
 public class CsvBoardLoader implements BoardLoader {
-private InputStream is;	 // stream, ze ktereho nacitame level
+	//zapis logovacich hlasek - pomocny objekt pro zapisovani hlasek o prubehu programu
+		static final Logger logger= Logger.getLogger(CsvBoardLoader.class.getName());
+		private InputStream is;	 // stream, ze ktereho nacitame level
 	
 	public CsvBoardLoader(InputStream is) {
 		this.is = is;
@@ -34,63 +36,76 @@ private InputStream is;	 // stream, ze ktereho nacitame level
 	
 	@Override
 	public GameBoard loadLevel() {
-		try(BufferedReader br = new BufferedReader(new InputStreamReader(is))){// radek s poctem typu dlazdic
-			String[] line = br.readLine().split(";");			
-			int typeCount = Integer.parseInt(line[0]);
-			Map<String, Tile> tileMap = new HashMap<String,Tile>();
-			BufferedImage birdBufferedImage = null;
-			for(int i=0; i<typeCount; i++){
-				line=br.readLine().split(";");
-				String tileType = line[0];
-				String clazz=line[1];
-				int x = Integer.parseInt(line[2]);
-				int y = Integer.parseInt(line[3]);
-				int w = Integer.parseInt(line[4]);
-				int h = Integer.parseInt(line[5]);
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"))) {
+			String[] line = br.readLine().split(";");
+			//kolik typů dlazdic
+			int numberOfTypes = Integer.parseInt(line[0]);			
+			//zpracovavame zdroje obrazku k matici a obrazek ptaka
+			BufferedImage imageOfTheBird = null;
+			Map<String, Tile> tileTypes = new HashMap<>();
+			for(int i =0; i<numberOfTypes;i++){
+				line = br.readLine().split(";");
+				String type = line[0];
+				String clazz = line[1];
+				int spriteX =Integer.parseInt(line[2]);
+				int spriteY = Integer.parseInt(line[3]);
+				int spriteWidth = Integer.parseInt(line[4]);
+				int spriteHeight = Integer.parseInt(line[5]);
 				String url = line[6];
-				String referencedTileType = line.length > 7?line[7]:"";
-				Tile referencedTile = tileMap.get(referencedTileType);
-//				tileTypes[i] = new WallTile(new Image);
+				//pouziva se u bonusu
+				String extraInfo =(line.length>=8)? line[7]: "";
+				Tile referenceTile=tileTypes.get(extraInfo);
 				if(clazz.equals("Bird")){
-					birdBufferedImage = loadImage(x, y, w, h, url);
+					//specialni radek - definice ptaka
+				imageOfTheBird = loadImage(spriteX, spriteY, spriteWidth, spriteHeight, url);
 				}else{
-					Tile tile = createTile(clazz, x, y, w, h, url, referencedTile);
-					tileMap.put(tileType, tile);
+					//normalni dlazdice
+					Tile tile = createTile(clazz, spriteX, spriteY, spriteWidth, spriteHeight, url, referenceTile);
+					tileTypes.put(type, tile);
 				}
+				
+				
 			}
-			// radek s pocty radku a sloupcu v matici herni plochy
+			//radek s pocty radku a sloupcu v matici herni plochy
 			line = br.readLine().split(";");
 			int rows = Integer.parseInt(line[0]);
-			int columns = Integer.parseInt(line[1]);
-			// vyrobime matici dlazdic
-			Tile[][] tiles = new Tile[rows][columns];
-			// projdeme radky s matici
-			System.out.println("Radky: " +rows+ " Sloupce: "+columns);
-			for(int i = 0; i<rows; i++){
-				line = br.readLine().split(";");
-				for(int j=0;j<columns;j++){
-					String cell; // retezec v dane bunce
-					// osetrime pripad, ze by v CSV chybely prazdne bunky na
-					// konci radku
+			int colums = Integer.parseInt(line[1]);
+			
+	//		System.out.println("radky a sloupce " + rows +" " +colums);
+			//vyrobime matici dlazdic
+			Tile[][] tiles = new Tile[rows][colums];
+	
+		
+			//projdeme radky s matici
+			for(int i = 0; i<rows;i++){
+				line=br.readLine().split(";");
+				for(int j =0; j<colums;j++){
+					//retezec v dane bunce
+					String t;
+					//osetreni, kdyby v csv chybely prazdne bunky na konci radku
 					if(j<line.length){
-						cell = line[j]; //bunka v CSV existuje
+						//v poradku, bunka je v csv
+						t = line[j];
+						
 					}else{
-						cell=""; //bunka v CSV chybi - povazujeme ji za prazdnou
+						//bunka chyby, povazujeme ji za prazdnou
+						t="";
 					}
-					tiles[i][j]=tileMap.get(cell);
+					if("B".equals(t)){
+						tiles[i][j] = ((BonusTile)tileTypes.get("B")).clone();
+						continue;
+					}
+					tiles[i][j]=tileTypes.get(t);
+					
 				}
 			}
-			GameBoard gb = new GameBoard(tiles, birdBufferedImage);
-			gb.setTile(tileMap.get(""));
+			GameBoard  gb = new GameBoard(tiles, imageOfTheBird);
 			return gb;			
 		} catch (IOException e) {
 			throw new RuntimeException("Chyba pri cteni souboru",e);
 		}
 		
 	}
-	
-	// pomocny objekt pro zapisovani hlasek o prubehu programu
-	static final Logger logger = Logger.getLogger(CsvBoardLoader.class.getName());
 
 	
 private Tile createTile(String type, int x, int y, int w, int h, String url, Tile referencedTile) {

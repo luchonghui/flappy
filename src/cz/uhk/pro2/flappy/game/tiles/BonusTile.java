@@ -6,23 +6,44 @@ import java.awt.Image;
 import cz.uhk.pro2.flappy.game.Tile;
 
 public class BonusTile extends AbstractWallTile {
-	Tile emptyTile;
+	private boolean eaten;//zda je bonus sneden
+	private Tile emptyTile;
 	
-
-	public BonusTile(Image img, Tile emptyTile){
-		super.img = img;
-		this.emptyTile = emptyTile;
+	
+	public BonusTile(Image image, Tile emptyTile) {
+		
+		super(image);
+		eaten = false;
+		this.emptyTile=emptyTile;
 	}
 	
+	public boolean isEaten() {
+		return eaten;
+	}
+
+	public void setEaten(boolean eaten) {
+		this.eaten = eaten;
+	}
+	public Tile getEmptyTile(){
+		return emptyTile;
+	}
 	@Override
 	public void draw(Graphics g, int x, int y){
-		g.drawImage(img, x, y, null);
+		if(eaten == false){
+			super.draw(g, x, y);
+		}else{
+			emptyTile.draw(g, x, y);
+		}
+	}
+	@Override
+	public BonusTile clone(){
+		return new BonusTile(img, emptyTile);
 	}
 
 	//dokud neni sezran je videt
-	// libovolne prazdny ctvereËek
-	// taky p¯es kolizi
-	// kdyû je to instance bonus tile tak seûr·no
+	// libovolne prazdny ctvere√®ek
+	// taky p≈ôes kolizi
+	// kdy≈æ je to instance bonus tile tak se≈ær√°no
 	
 	//metoda draw z abstract tile ...prepsat
 }
